@@ -1,0 +1,32 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es 
+  precision highp float;
+
+  out vec4 fragmentColor;
+  in vec2 texCoord; //passed from CS 
+  in vec3 worldNormal; 
+  in vec4 worldPosition;
+
+  uniform samplerCube envmapTexture;
+  
+  uniform struct {
+      vec4 position[8];
+      vec4 powerDensity[8];
+      vec3 camera;
+  } lighting;
+
+  uniform struct {
+      vec3 position;
+  } camera;
+
+
+  void main(void) {
+    vec3 normal = normalize(worldNormal);
+    vec3 position = worldPosition.xyz / worldPosition.w;
+
+    vec3 viewDir = normalize(camera.position - position);
+    
+    // use this function to sample texture with reflected direction
+    fragmentColor = texture(envmapTexture, reflect(-viewDir, normal));
+  }
+
+`;
