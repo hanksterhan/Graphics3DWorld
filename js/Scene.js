@@ -178,9 +178,11 @@ Scene.prototype.update = function(gl, keysPressed) {
   }
   if(keysPressed.U){ // rotate LEFT
     this.avatar.orientation -= 0.1;
+    // this.avatar.orientation.y -= 0.1;
   }
   if(keysPressed.O){ // rotate RIGHT
     this.avatar.orientation += 0.1;
+    // this.avatar.orientation.y += 0.1;
   }
 
   for(let i=0; i<this.gameObjects.length; i++){

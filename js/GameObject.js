@@ -14,7 +14,7 @@ GameObject.prototype.updateModelMatrix =
 // TODO: set the game object’s model matrix property according to the position, orientation, and scale
   this.modelMatrix.set().
     scale(this.scale).
-    rotate(this.orientation).
+    rotate(this.orientation, 0, this.orientation).
     translate(this.position);
 };
 
