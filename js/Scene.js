@@ -9,6 +9,8 @@ const Scene = function(gl) {
   this.headlightProgram = new TexturedProgram(gl, this.vsTrafo, this.fsHeadlight);
   this.fsSpotlight = new Shader(gl, gl.FRAGMENT_SHADER, "spotlight_fs.essl");
   this.spotlightProgram = new TexturedProgram(gl, this.vsTrafo, this.fsSpotlight);
+  this.fsmarble = new Shader(gl, gl.FRAGMENT_SHADER, "marble_fs.essl");
+  this.marbleProgram = new TexturedProgram(gl, this.vsTrafo, this.fsmarble);
   this.texturedQuadGeometry = new TexturedQuadGeometry(gl);  
   
   this.fsTextureCube = new Shader(gl, gl.FRAGMENT_SHADER, "texturecube_fs.essl");
@@ -40,6 +42,19 @@ const Scene = function(gl) {
   );
   this.slowpoke = new GameObject(this.slowpokeMesh);
   this.slowpoke.position.set({x:-5, y:-3, z:-15});
+
+  // marbled slowpoke
+  this.slowpokeMarbleMaterials = [
+    new Material(gl, this.marbleProgram),
+    new Material(gl, this.marbleProgram),
+    ];
+  this.slowpokeMarbleMesh = new MultiMesh(
+    gl, 
+    'media/slowpoke/Slowpoke.json', 
+    this.slowpokeMarbleMaterials
+  );
+  this.slowpokeMarble = new GameObject(this.slowpokeMarbleMesh);
+  this.slowpokeMarble.position.set({x:0, y:-6, z:-15});
 
   // avatar
   this.avatarMaterials = [
@@ -133,15 +148,26 @@ const Scene = function(gl) {
   this.gameObjects.push(this.slowpoke);
   this.gameObjects.push(this.slowpokeReflective);
   this.gameObjects.push(this.avatar);
+  this.gameObjects.push(this.slowpokeMarble);
   // this.gameObjects.push(this.snorlax);
   // this.gameObjects.push(new GameObject(this.backgroundMesh));
 
   this.camera = new PerspectiveCamera();
 
-  Uniforms.lighting.position.at(0).set(1.0, 1.0, 1.0, 1.0);
+  Uniforms.lighting.position.at(0).set(1.0, 1.0, 1.0, 0.0);
   Uniforms.lighting.powerDensity.at(0).set(1.0, 1.0, 9.0, 1.0);
-  Uniforms.spotlight.position.at(0).set(0.0, 6.0, -8.0, 1.0);
-  Uniforms.spotlight.powerDensity.at(0).set(1.0, 1.0, 9.0, 1.0);
+
+  // position light:
+  Uniforms.lighting.position.at(1).set(0.0, 20.0, -8.0, 1.0);
+  Uniforms.lighting.powerDensity.at(1).set(1.0, 1.0, 9.0, 1.0);
+
+  // set marble properties
+  Uniforms.marbleProperties.noiseFreq.set(2.0);
+  Uniforms.marbleProperties.noiseExp.set(4.0);
+  Uniforms.marbleProperties.noiseAmp.set(10.0);
+  Uniforms.marbleProperties.lightColor.set(0.0, 0.0, 0.0);
+  Uniforms.marbleProperties.darkColor.set(64.0, 224.0, 208.0);
+  
 
   gl.enable(gl.DEPTH_TEST);
 
@@ -178,11 +204,15 @@ Scene.prototype.update = function(gl, keysPressed) {
   }
   if(keysPressed.U){ // rotate LEFT
     this.avatar.orientation -= 0.1;
-    // this.avatar.orientation.y -= 0.1;
   }
   if(keysPressed.O){ // rotate RIGHT
     this.avatar.orientation += 0.1;
-    // this.avatar.orientation.y += 0.1;
+  }
+  if(keysPressed.N){ // move AWAY
+    this.avatar.position.z -= 0.1;
+  }
+  if(keysPressed.M){ // move CLOSER
+    this.avatar.position.z += 0.1;
   }
 
   for(let i=0; i<this.gameObjects.length; i++){
