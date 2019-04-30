@@ -30,7 +30,6 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 30
     float w = pow((sin(modelPosition.x) + 1.0)/2.0, 4.0) + pow(snoise(modelPosition * marbleProperties.noiseFreq), marbleProperties.noiseExp) * marbleProperties.noiseAmp;
     // float w = fract(modelPosition.x * 60.0);
 
-
     vec3 color = mix(marbleProperties.lightColor, marbleProperties.darkColor, w);
     fragmentColor.rgb = color;
     fragmentColor.a = 1.0;
