@@ -5,10 +5,9 @@ An interactive 3D world created using WebGL/OpenGL
 - Avatar (keys IJKL to move, keys UO to rotate, NM to move closer/farther)
 - Sunshine 
 - Diffuse
+- Shining
 - Spotlight
 - Procedural Solid Texturing (buggy)
 - Ground Zero
 - Pitch Black (ongoing)
-- Helicam (upcoming)
-- Shining
 - 
