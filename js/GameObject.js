@@ -24,5 +24,19 @@ GameObject.prototype.draw = function(camera){
 // TODO: Set the uniform modelViewProjMatrix (reflected in the material) from the modelMatrix property of GameObject (no camera yet). Operator = cannot be used. Use Mat4’s methods set() and/or mul().
   Uniforms.gameObject.animScale.set(1, 1);
   Uniforms.gameObject.modelViewProjMatrix.set(this.modelMatrix).mul(camera.viewProjMatrix);
+  Uniforms.gameObject.modelMatrixInverse.set(this.modelMatrix).invert();
+  Uniforms.gameObject.modelMatrix.set(this.modelMatrix);
   this.mesh.draw(); 
 };
+
+GameObject.prototype.drawShadow = function(camera, material){
+  this.updateModelMatrix();
+  Uniforms.gameObject.animScale.set(1, 1);
+  
+  this.mesh.drawSelected(material); 
+  // TODO: 
+
+  Uniforms.gameObject.modelViewProjMatrix.set(this.modelMatrix).mul(camera.viewProjMatrix);
+  Uniforms.gameObject.modelMatrixInverse.set(this.modelMatrix).invert();
+  Uniforms.gameObject.modelMatrix.set(this.modelMatrix);
+}

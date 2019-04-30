@@ -11,7 +11,12 @@ const Scene = function(gl) {
   this.spotlightProgram = new TexturedProgram(gl, this.vsTrafo, this.fsSpotlight);
   this.fsmarble = new Shader(gl, gl.FRAGMENT_SHADER, "marble_fs.essl");
   this.marbleProgram = new TexturedProgram(gl, this.vsTrafo, this.fsmarble);
-  this.texturedQuadGeometry = new TexturedQuadGeometry(gl);  
+  this.vsplane = new Shader(gl, gl.VERTEX_SHADER, "textureplane_vs.essl");
+  this.fsplane = new Shader(gl, gl.FRAGMENT_SHADER, "textureplane_fs.essl");
+  this.planeProgram = new TexturedProgram(gl, this.vsplane, this.fsplane);
+
+  this.texturedQuadGeometry = new TexturedQuadGeometry(gl);
+  this.planeGeometry = new PlaneGeometry(gl);
   
   this.fsTextureCube = new Shader(gl, gl.FRAGMENT_SHADER, "texturecube_fs.essl");
   this.texturedCubeProgram = new TexturedProgram(gl, this.vsTrafo, this.fsTextureCube);
@@ -154,12 +159,13 @@ const Scene = function(gl) {
 
   this.camera = new PerspectiveCamera();
 
+  // directional light:
   Uniforms.lighting.position.at(0).set(1.0, 1.0, 1.0, 0.0);
   Uniforms.lighting.powerDensity.at(0).set(1.0, 1.0, 9.0, 1.0);
 
   // position light:
   Uniforms.lighting.position.at(1).set(0.0, 20.0, -8.0, 1.0);
-  Uniforms.lighting.powerDensity.at(1).set(1.0, 1.0, 9.0, 1.0);
+  Uniforms.lighting.powerDensity.at(1).set(1000.0, 1000.0, 9000.0, 1.0);
 
   // set marble properties
   Uniforms.marbleProperties.noiseFreq.set(2.0);
@@ -195,12 +201,14 @@ Scene.prototype.update = function(gl, keysPressed) {
   }
   if(keysPressed.J){ // move LEFT
     this.avatar.position.x -= 0.1;
+    Uniforms.lighting.position.at(1).x -= 0.1;
   }
   if(keysPressed.K){ // move DOWN
     this.avatar.position.y -= 0.1;
   }
   if(keysPressed.L){ // move RIGHT
     this.avatar.position.x += 0.1;
+    Uniforms.lighting.position.at(1).x += 0.1;
   }
   if(keysPressed.U){ // rotate LEFT
     this.avatar.orientation -= 0.1;
