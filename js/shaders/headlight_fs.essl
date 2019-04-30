@@ -22,9 +22,11 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 30
   	vec3 position = worldPosition.xyz / worldPosition.w; 
     vec3 viewDir = normalize(camera.position - position);
 
+    // Lambertian shading
     fragmentColor.rgb = lighting.powerDensity[0].rgb * texture(colorTexture, texCoord).rgb * dot(worldNormal, lighting.position[0].xyz);
     fragmentColor.a = 1.0;
 
+    // Phong-Blinn shading
     fragmentColor.rgb = lighting.powerDensity[0].rgb * texture(colorTexture, texCoord).rgb * dot(worldNormal, lighting.position[0].xyz) + lighting.powerDensity[0].rgb * vec3(10.0,10.0,10.0) * pow(dot(normal, normalize(viewDir + lighting.position[0].xyz)), 20.0);
 
   }

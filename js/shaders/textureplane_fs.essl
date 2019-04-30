@@ -3,23 +3,14 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 30
 
   out vec4 fragmentColor;
   in vec4 texCoord; // passed from VS
-  in vec3 worldNormal;
-  in vec4 worldPosition;  
+
   // we need to bind texture to this
   uniform sampler2D colorTexture;
 
-  uniform struct  {
-  	vec3 position;
-  } camera;
-
-  uniform struct {
-    vec4 position[8]; // xyz is the direction, w is 0 for direction light, 1 for point light
-    vec4 powerDensity[8];  // w ignored
-  } lighting;
-
   void main(void) {
-    // texCoord.xy / texCoord.w // TODO: what do we assign this too?
-    //fragmentColor = texture(colorTexture, texCoord);
+    float x = texCoord.x / texCoord.w;
+    float y = texCoord.y / texCoord.w;
+    fragmentColor = texture(colorTexture, vec2(x,y));
   }
 
 `;

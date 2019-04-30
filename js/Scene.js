@@ -22,6 +22,9 @@ const Scene = function(gl) {
   this.texturedCubeProgram = new TexturedProgram(gl, this.vsTrafo, this.fsTextureCube);
   this.slowpokeReflectiveMaterial = new Material(gl, this.texturedCubeProgram);
 
+  this.blackMaterial = new Material(gl, this.solidProgram);
+  this.blackMaterial.solidColor.set(0,0,0);
+
   this.fsbackground = new Shader(gl, gl.FRAGMENT_SHADER, "background_fs.essl");
   this.vsbackground = new Shader(gl, gl.VERTEX_SHADER, "background_vs.essl");
   this.backgroundProgram = new TexturedProgram(gl, this.vsbackground, this.fsbackground);
@@ -29,6 +32,13 @@ const Scene = function(gl) {
 
   this.timeAtFirstFrame = new Date().getTime();
   this.timeAtLastFrame = this.timeAtFirstFrame;
+
+  // ground zero
+  this.planeMaterial = new Material(gl, this.planeProgram);
+  this.planeMaterial.colorTexture.set(new Texture2D(gl, "media/water.jpg"));
+  this.planeMesh = new Mesh(this.planeGeometry, this.planeMaterial);
+  this.plane = new GameObject(this.planeMesh);
+  this.plane.position.set(0, -5, 0);
 
   // regular slowpoke
   this.slowpokeMaterials = [
@@ -154,6 +164,7 @@ const Scene = function(gl) {
   this.gameObjects.push(this.slowpokeReflective);
   this.gameObjects.push(this.avatar);
   this.gameObjects.push(this.slowpokeMarble);
+  this.gameObjects.push(this.plane);
   // this.gameObjects.push(this.snorlax);
   // this.gameObjects.push(new GameObject(this.backgroundMesh));
 
@@ -226,6 +237,9 @@ Scene.prototype.update = function(gl, keysPressed) {
   for(let i=0; i<this.gameObjects.length; i++){
     this.gameObjects[i].draw(this.camera);
   }
+  // for(let i=0; i<this.gameObjects.length; i++){
+  //   this.gameObjects[i].drawShadow(this.camera, this.blackMaterial);
+  // }
 };
 
 

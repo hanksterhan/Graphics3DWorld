@@ -33,10 +33,12 @@ GameObject.prototype.drawShadow = function(camera, material){
   this.updateModelMatrix();
   Uniforms.gameObject.animScale.set(1, 1);
   
-  this.mesh.drawSelected(material); 
-  // TODO: 
-
+  this.modelMatrix.set().
+    scale(new Vec3(1, 0, 1)). 
+    translate(new Vec3(0, 0.1, 0));
+    
   Uniforms.gameObject.modelViewProjMatrix.set(this.modelMatrix).mul(camera.viewProjMatrix);
   Uniforms.gameObject.modelMatrixInverse.set(this.modelMatrix).invert();
   Uniforms.gameObject.modelMatrix.set(this.modelMatrix);
+  this.mesh.drawSelected(material); 
 }

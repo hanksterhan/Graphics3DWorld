@@ -7,10 +7,10 @@ const PlaneGeometry = function(gl) {
   gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER,
     new Float32Array([
-       0, 0, 0, 0,
-      -0.5, 0.5, 0.5, 0,
-       0.5, 0.5, 0.5, 0,
-       0.5, 0.5, 0.5, 0
+       0.0, 0.0,  0.0, 1.0,
+       1.5, 0.0,  0.5, 0.0,
+       0.5, 0.0,  1.5, 0.0,
+      -0.5, 0.0, -0.5, 0.0
     ]),
     gl.STATIC_DRAW);
 
@@ -43,7 +43,7 @@ const PlaneGeometry = function(gl) {
   gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
   gl.enableVertexAttribArray(0);
   gl.vertexAttribPointer(0,
-    3, gl.FLOAT, //< three pieces of float
+    4, gl.FLOAT, //< three pieces of float
     false, //< do not normalize (make unit length)
     0, //< tightly packed
     0 //< data starts at array start
@@ -60,7 +60,7 @@ const PlaneGeometry = function(gl) {
   gl.bindVertexArray(null);
 };
 
-TriangleGeometry.prototype.draw = function() {
+PlaneGeometry.prototype.draw = function() {
   const gl = this.gl;
 
   gl.bindVertexArray(this.inputLayout);
