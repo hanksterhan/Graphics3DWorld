@@ -7,7 +7,7 @@ An interactive 3D world created using WebGL/OpenGL
 - Diffuse
 - Shining
 - Spotlight
-- Procedural Solid Texturing (buggy)
+- Procedural Solid Texturing
 - Ground Zero
-- Pitch Black (ongoing)
+- Pitch Black
 - 

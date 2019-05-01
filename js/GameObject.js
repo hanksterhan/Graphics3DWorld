@@ -33,7 +33,7 @@ GameObject.prototype.drawShadow = function(camera, material){
   this.updateModelMatrix();
   Uniforms.gameObject.animScale.set(1, 1);
   
-  this.modelMatrix.set().
+  this.modelMatrix.
     scale(new Vec3(1, 0, 1)). 
     translate(new Vec3(0, 0.1, 0));
     

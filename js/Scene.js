@@ -10,10 +10,12 @@ const Scene = function(gl) {
   this.fsSpotlight = new Shader(gl, gl.FRAGMENT_SHADER, "spotlight_fs.essl");
   this.spotlightProgram = new TexturedProgram(gl, this.vsTrafo, this.fsSpotlight);
   this.fsmarble = new Shader(gl, gl.FRAGMENT_SHADER, "marble_fs.essl");
+  this.fsblack = new Shader(gl, gl.FRAGMENT_SHADER, "black_fs.essl");
   this.marbleProgram = new TexturedProgram(gl, this.vsTrafo, this.fsmarble);
   this.vsplane = new Shader(gl, gl.VERTEX_SHADER, "textureplane_vs.essl");
   this.fsplane = new Shader(gl, gl.FRAGMENT_SHADER, "textureplane_fs.essl");
   this.planeProgram = new TexturedProgram(gl, this.vsplane, this.fsplane);
+  this.blackProgram = new TexturedProgram(gl, this.vsTrafo, this.fsblack);
 
   this.texturedQuadGeometry = new TexturedQuadGeometry(gl);
   this.planeGeometry = new PlaneGeometry(gl);
@@ -22,7 +24,7 @@ const Scene = function(gl) {
   this.texturedCubeProgram = new TexturedProgram(gl, this.vsTrafo, this.fsTextureCube);
   this.slowpokeReflectiveMaterial = new Material(gl, this.texturedCubeProgram);
 
-  this.blackMaterial = new Material(gl, this.solidProgram);
+  this.blackMaterial = new Material(gl, this.blackProgram);
   this.blackMaterial.solidColor.set(0,0,0);
 
   this.fsbackground = new Shader(gl, gl.FRAGMENT_SHADER, "background_fs.essl");
@@ -38,7 +40,7 @@ const Scene = function(gl) {
   this.planeMaterial.colorTexture.set(new Texture2D(gl, "media/water.jpg"));
   this.planeMesh = new Mesh(this.planeGeometry, this.planeMaterial);
   this.plane = new GameObject(this.planeMesh);
-  this.plane.position.set(0, -5, 0);
+  this.plane.position.set(0, 0, 0);
 
   // regular slowpoke
   this.slowpokeMaterials = [
@@ -56,7 +58,7 @@ const Scene = function(gl) {
     this.slowpokeMaterials
   );
   this.slowpoke = new GameObject(this.slowpokeMesh);
-  this.slowpoke.position.set({x:-5, y:-3, z:-15});
+  this.slowpoke.position.set({x:-8, y:2, z:-15});
 
   // marbled slowpoke
   this.slowpokeMarbleMaterials = [
@@ -69,7 +71,7 @@ const Scene = function(gl) {
     this.slowpokeMarbleMaterials
   );
   this.slowpokeMarble = new GameObject(this.slowpokeMarbleMesh);
-  this.slowpokeMarble.position.set({x:0, y:-6, z:-15});
+  this.slowpokeMarble.position.set({x:18, y:2, z:-15});
 
   // avatar
   this.avatarMaterials = [
@@ -154,7 +156,7 @@ const Scene = function(gl) {
     [this.slowpokeReflectiveMaterial, this.slowpokeReflectiveMaterial]
   );
   this.slowpokeReflective = new GameObject(this.slowpokeReflectiveMesh);
-  this.slowpokeReflective.position.set({x:8, y:-3, z:-20});
+  this.slowpokeReflective.position.set({x:8, y:4, z:-20});
 
 
   // this.backgroundMesh = new Mesh(this.texturedQuadGeometry, this.backgroundMaterial);
@@ -169,6 +171,7 @@ const Scene = function(gl) {
   // this.gameObjects.push(new GameObject(this.backgroundMesh));
 
   this.camera = new PerspectiveCamera();
+  this.camera.position.set(0, 3, 10);
 
   // directional light:
   Uniforms.lighting.position.at(0).set(1.0, 1.0, 1.0, 0.0);
@@ -179,11 +182,11 @@ const Scene = function(gl) {
   Uniforms.lighting.powerDensity.at(1).set(1000.0, 1000.0, 9000.0, 1.0);
 
   // set marble properties
-  Uniforms.marbleProperties.noiseFreq.set(2.0);
+  Uniforms.marbleProperties.noiseFreq.set(8.0);
   Uniforms.marbleProperties.noiseExp.set(4.0);
-  Uniforms.marbleProperties.noiseAmp.set(10.0);
-  Uniforms.marbleProperties.lightColor.set(0.0, 0.0, 0.0);
-  Uniforms.marbleProperties.darkColor.set(64.0, 224.0, 208.0);
+  Uniforms.marbleProperties.noiseAmp.set(50.0);
+  Uniforms.marbleProperties.lightColor.set(1.0, 1.0, 1.0);
+  Uniforms.marbleProperties.darkColor.set(0.4, 0.1, 0.2);
   
 
   gl.enable(gl.DEPTH_TEST);
@@ -237,7 +240,8 @@ Scene.prototype.update = function(gl, keysPressed) {
   for(let i=0; i<this.gameObjects.length; i++){
     this.gameObjects[i].draw(this.camera);
   }
-  for(let i=0; i<this.gameObjects.length; i++){
+  // subtract one from the length because we don't want to draw
+  for(let i=0; i<this.gameObjects.length-1; i++){
     this.gameObjects[i].drawShadow(this.camera, this.blackMaterial);
   }
 };

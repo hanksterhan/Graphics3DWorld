@@ -29,3 +29,11 @@ MultiMesh.prototype.draw = function(){
     this.meshes[i].draw(); 
   } 
 }; 
+
+MultiMesh.prototype.drawSelected = function(material){ 
+  for (let i = 0; i < this.meshes.length; i++) { 
+    this.meshes[i].drawSelected(material); 
+  } 
+}; 
+
+
