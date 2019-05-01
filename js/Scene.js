@@ -11,6 +11,8 @@ const Scene = function(gl) {
   this.spotlightProgram = new TexturedProgram(gl, this.vsTrafo, this.fsSpotlight);
   this.fsmarble = new Shader(gl, gl.FRAGMENT_SHADER, "marble_fs.essl");
   this.fsblack = new Shader(gl, gl.FRAGMENT_SHADER, "black_fs.essl");
+  this.fsphongblinn = new Shader(gl, gl.FRAGMENT_SHADER, "phongblinn_fs.essl");
+  this.phongblinnProgram = new TexturedProgram(gl, this.vsTrafo, this.fsphongblinn);
   this.marbleProgram = new TexturedProgram(gl, this.vsTrafo, this.fsmarble);
   this.vsplane = new Shader(gl, gl.VERTEX_SHADER, "textureplane_vs.essl");
   this.fsplane = new Shader(gl, gl.FRAGMENT_SHADER, "textureplane_fs.essl");
@@ -42,7 +44,7 @@ const Scene = function(gl) {
   this.plane = new GameObject(this.planeMesh);
   this.plane.position.set(0, 0, 0);
 
-  // regular slowpoke
+  // regular slowpoke with lambertian shading
   this.slowpokeMaterials = [
     new Material(gl, this.headlightProgram),
     new Material(gl, this.headlightProgram),
@@ -59,6 +61,24 @@ const Scene = function(gl) {
   );
   this.slowpoke = new GameObject(this.slowpokeMesh);
   this.slowpoke.position.set({x:-8, y:2, z:-15});
+
+  // regular slowpoke with phong-blinn lighting
+  this.slowpoke1Materials = [
+    new Material(gl, this.phongblinnProgram),
+    new Material(gl, this.phongblinnProgram),
+    ];
+  this.slowpoke1Materials[0].colorTexture.set(
+    new Texture2D(gl, 'media/slowpoke/YadonDh.png'));
+  this.slowpoke1Materials[1].colorTexture.set(
+    new Texture2D(gl, 'media/slowpoke/YadonEyeDh.png'));  
+
+  this.slowpoke1Mesh = new MultiMesh(
+    gl, 
+    'media/slowpoke/Slowpoke.json', 
+    this.slowpoke1Materials
+  );
+  this.slowpoke1 = new GameObject(this.slowpokeMesh);
+  this.slowpoke1.position.set({x:-16, y:2, z:-15});
 
   // marbled slowpoke
   this.slowpokeMarbleMaterials = [
@@ -163,6 +183,7 @@ const Scene = function(gl) {
 
   this.gameObjects = [];
   this.gameObjects.push(this.slowpoke);
+  this.gameObjects.push(this.slowpoke1);
   this.gameObjects.push(this.slowpokeReflective);
   this.gameObjects.push(this.avatar);
   this.gameObjects.push(this.slowpokeMarble);
@@ -175,7 +196,7 @@ const Scene = function(gl) {
 
   // directional light:
   Uniforms.lighting.position.at(0).set(1.0, 1.0, 1.0, 0.0);
-  Uniforms.lighting.powerDensity.at(0).set(1.0, 1.0, 9.0, 1.0);
+  Uniforms.lighting.powerDensity.at(0).set(1.0, 1.5, 9.0, 1.0);
 
   // position light:
   Uniforms.lighting.position.at(1).set(0.0, 20.0, -8.0, 1.0);
@@ -212,6 +233,7 @@ Scene.prototype.update = function(gl, keysPressed) {
 
   if(keysPressed.I){ // move UP
     this.avatar.position.y += 0.1;
+    Uniforms.lighting.position.at(1).y += 0.1;
   }
   if(keysPressed.J){ // move LEFT
     this.avatar.position.x -= 0.1;
@@ -219,6 +241,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   }
   if(keysPressed.K){ // move DOWN
     this.avatar.position.y -= 0.1;
+    Uniforms.lighting.position.at(1).y -= 0.1;
   }
   if(keysPressed.L){ // move RIGHT
     this.avatar.position.x += 0.1;
