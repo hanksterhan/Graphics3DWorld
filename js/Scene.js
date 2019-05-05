@@ -17,7 +17,7 @@ const Scene = function(gl) {
   this.vsplane = new Shader(gl, gl.VERTEX_SHADER, "textureplane_vs.essl");
   this.fsplane = new Shader(gl, gl.FRAGMENT_SHADER, "textureplane_fs.essl");
   this.planeProgram = new TexturedProgram(gl, this.vsplane, this.fsplane);
-  this.blackProgram = new TexturedProgram(gl, this.vsTrafo, this.fsblack);
+  this.colorProgram = new TexturedProgram(gl, this.vsTrafo, this.fsblack);
 
   this.texturedQuadGeometry = new TexturedQuadGeometry(gl);
   this.planeGeometry = new PlaneGeometry(gl);
@@ -26,8 +26,11 @@ const Scene = function(gl) {
   this.texturedCubeProgram = new TexturedProgram(gl, this.vsTrafo, this.fsTextureCube);
   this.slowpokeReflectiveMaterial = new Material(gl, this.texturedCubeProgram);
 
-  this.blackMaterial = new Material(gl, this.blackProgram);
+  this.blackMaterial = new Material(gl, this.colorProgram);
   this.blackMaterial.solidColor.set(0,0,0);
+
+  this.redMaterial = new Material(gl, this.colorProgram);
+  this.redMaterial.solidColor.set(1,0,0); 
 
   this.fsbackground = new Shader(gl, gl.FRAGMENT_SHADER, "background_fs.essl");
   this.vsbackground = new Shader(gl, gl.VERTEX_SHADER, "background_vs.essl");
@@ -43,6 +46,29 @@ const Scene = function(gl) {
   this.planeMesh = new Mesh(this.planeGeometry, this.planeMaterial);
   this.plane = new GameObject(this.planeMesh);
   this.plane.position.set(0, 0, 0);
+
+  const genericMove = function(t, dt){
+    this.position.y -= dt;
+    // this.position.x -= Math.sin(t);
+    const acceleration = new Vec3(this.force).mul(this.invMass);
+    
+    this.velocity.addScaled(dt, acceleration);
+    this.velocity.mul(Math.pow(this.backDrag, dt)); //account for drag
+    this.position.addScaled(dt, this.velocity);
+    
+    this.angularAcceleration = this.invAngularMass * this.torque;
+    this.angularVelocity += this.angularAcceleration * dt;
+    this.angularVelocity *= Math.pow(this.angularDrag, dt); //account for drag
+    this.orientation += this.angularVelocity * dt;
+
+    this.ahead = new Vec3(Math.cos(this.orientation), Math.sin(this.orientation), 0);
+    this.aheadVelocity = this.ahead.mul(this.ahead.dot(this.velocity))
+    this.sideVelocity = this.velocity - this.aheadVelocity;
+    this.velocity.set();
+
+    this.velocity.addScaled(Math.pow(this.backDrag, dt), this.aheadVelocity);
+    this.velocity.addScaled(Math.pow(this.sideDrag, dt), this.sideVelocity);
+  };
 
   // regular slowpoke with lambertian shading
   this.slowpokeMaterials = [
@@ -80,6 +106,7 @@ const Scene = function(gl) {
   this.slowpoke1 = new GameObject(this.slowpokeMesh);
   this.slowpoke1.position.set({x:-16, y:2, z:-15});
 
+  
   // marbled slowpoke
   this.slowpokeMarbleMaterials = [
     new Material(gl, this.marbleProgram),
@@ -111,53 +138,6 @@ const Scene = function(gl) {
   this.avatar = new GameObject(this.avatarMesh);
   this.avatar.position.set({x:0, y:5, z:-8});
 
-  // this.snorlaxMaterials = [
-  //   new Material(gl, this.headlightProgram),
-  //   new Material(gl, this.headlightProgram),
-  //   new Material(gl, this.headlightProgram),
-  // ];
-  // this.snorlaxMaterials[0].colorTexture.set(
-  //   new Texture2D(gl, 'media/snorlax/Body1_0.png')
-  // );
-  // this.snorlaxMaterials[1].colorTexture.set(
-  //   new Texture2D(gl, 'media/snorlax/Eye1_0.png')
-  // );
-  // this.snorlaxMaterials[2].colorTexture.set(
-  //   new Texture2D(gl, 'media/snorlax/Mouth1_0.png')
-  // );
-
-  // this.snorlaxMesh = new MultiMesh3(
-  //   gl, 
-  //   'media/snorlax/Snorlax.json',
-  //   this.snorlaxMaterials
-  // );
-  // this.snorlax = new GameObject(this.snorlaxMesh);
-  // this.snorlax.position.set({x:0, y:0, z:0})
-
-  // this.aventadorMaterials = [
-  //   new Material(gl, this.headlightProgram),
-  //   new Material(gl, this.headlightProgram),
-  //   new Material(gl, this.headlightProgram),
-  //   new Material(gl, this.headlightProgram),
-  //   new Material(gl, this.headlightProgram),
-  // ]
-  // this.aventadorMaterials[0].colorTexture.set(
-  //   new Texture2D(gl, 'media/aventador/interior_lod0.png'));
-  // this.aventadorMaterials[1].colorTexture.set(
-  //   new Texture2D(gl, 'media/aventador/lights_lod0.png'));
-  // this.aventadorMaterials[2].colorTexture.set(
-  //   new Texture2D(gl, 'media/aventador/lights.png'));
-  // this.aventadorMaterials[3].colorTexture.set(
-  //   new Texture2D(gl, 'media/aventador/nodamage_lod0.png'));
-  // this.aventadorMaterials[4].colorTexture.set(
-  //   new Texture2D(gl, 'media/aventador/nodamage.png'));
-
-  // this.aventadorMesh = new MultiMesh(
-  //   gl,
-  //   'media/aventador/Aventador.json',
-  //   this.aventadorMaterials
-  // );
-
   this.skyCubeTexture = new TextureCube(gl, [
     "media/posx.jpg",
     "media/negx.jpg",
@@ -178,6 +158,22 @@ const Scene = function(gl) {
   this.slowpokeReflective = new GameObject(this.slowpokeReflectiveMesh);
   this.slowpokeReflective.position.set({x:8, y:4, z:-20});
 
+  // sphere
+  this.sphereMesh = new MultiMesh(gl, 'media/sphere/Sphere.json', [this.redMaterial, this.redMaterial]);
+  this.sphere = new GameObject(this.sphereMesh);
+  this.sphere.scale.set(3, 3, 3);
+  this.sphere.position.set({x:0, y:5, z:0});
+
+  // // pikachu 
+  // this.pikachuMaterials = [
+  //   new Material(gl, this.headlightProgram),
+  // ];
+  // this.pikachuMaterials[0].colorTexture.set(
+  //   new Texture2D(gl, 'media/pikachu/pikachu_texture.png'));
+
+  // this.pikachuMesh = new MultiMesh(gl, 'media/pikachu/Pikachu.json', this.pikachuMaterials);
+  // this.pikachu = new GameObject(this.pikachuMesh);
+  // this.pikachu.position.set({x:2, y:2, z:0});
 
   // this.backgroundMesh = new Mesh(this.texturedQuadGeometry, this.backgroundMaterial);
 
@@ -187,6 +183,8 @@ const Scene = function(gl) {
   this.gameObjects.push(this.slowpokeReflective);
   this.gameObjects.push(this.avatar);
   this.gameObjects.push(this.slowpokeMarble);
+  this.gameObjects.push(this.sphere);
+  // this.gameObjects.push(this.pikachu);
   this.gameObjects.push(this.plane);
   // this.gameObjects.push(this.snorlax);
   // this.gameObjects.push(new GameObject(this.backgroundMesh));
@@ -211,6 +209,23 @@ const Scene = function(gl) {
   
 
   gl.enable(gl.DEPTH_TEST);
+
+    // calculate difference from the avatar to the sphere
+    this.distanceXc = this.avatar.position.x - this.sphere.position.x;
+    this.distanceYc = this.avatar.position.y - this.sphere.position.y;
+    this.distanceZc = this.avatar.position.z - this.sphere.position.z;
+  
+    this.distancec = Math.sqrt(Math.pow(this.distanceXc, 2) + Math.pow(this.distanceYc, 2) + Math.pow(this.distanceZc, 2));
+    
+    this.normalc = new Vec3(this.distanceXc / this.distancec, this.distanceYc / this.distancec, this.distanceZc / this.distancec);
+
+    console.log(this.sphere);
+    console.log(this.avatar);
+    console.log(this.sphere.scale.x);
+    console.log(this.sphere.scale.y);
+    console.log(this.avatar.scale.x);
+    console.log(this.avatar.scale.y);
+
 
 };
 
@@ -259,6 +274,19 @@ Scene.prototype.update = function(gl, keysPressed) {
   if(keysPressed.M){ // move CLOSER
     this.avatar.position.z += 0.1;
   }
+
+  // // calculate difference from the avatar to the sphere
+  // this.distanceX = this.avatar.position.x - this.sphere.position.x;
+  // this.distanceY = this.avatar.position.y - this.sphere.position.y;
+  // this.distanceZ = this.avatar.position.z - this.sphere.position.z;
+
+  // this.distance = Math.sqrt(Math.pow(this.distanceX, 2) + Math.pow(this.distanceY, 2) + Math.pow(this.distanceZ, 2));
+  
+  // this.normal = new Vec3(this.distanceX / this.distance, this.distanceY / this.distance, this.distanceZ / this.distance);
+
+  // if (this.distance < (this.avatar.scale.x + this.sphere.scale.x) || this.distance < (this.avatar.scale.y + this.sphere.scale.y)){
+  //   console.log("collision");
+  // }
 
   for(let i=0; i<this.gameObjects.length; i++){
     this.gameObjects[i].draw(this.camera);

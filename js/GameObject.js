@@ -7,6 +7,17 @@ const GameObject = function(mesh) {
   this.scale = new Vec3(1, 1, 1); 
 
   this.modelMatrix = new Mat4(); 
+
+  this.move = function(){};
+  this.control = function(){};
+  this.force = new Vec3();
+  this.torque = 0;
+  this.velocity = new Vec3();
+  this.invMass = 1; 
+  this.backDrag = 1;
+  // this.sideDrag = 1; 
+  // this.angularVelocity = 0;
+  // this.angularDrag = 1;
 };
 
 GameObject.prototype.updateModelMatrix =
